@@ -35,6 +35,12 @@ typedef struct
   fb_image *tmp; // temp for zoom
 } pos_image;
 
+typedef struct
+{
+  int x;
+  int y;
+} finger_pos;
+
 void SHELL_TEST(pos_image *img);
 
 // 图片渲染相关
@@ -53,3 +59,4 @@ int prev_pic(int now);
 
 // 触控相关
 int get_single_event(int x1, int y1, int x2, int y2);
+int get_pinch_event(finger_pos prevA, finger_pos A, finger_pos prevB, finger_pos B);

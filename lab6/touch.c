@@ -20,3 +20,19 @@ int get_single_event(int x1, int y1, int x2, int y2)
   }
   return INVALID;
 }
+
+int get_pinch_event(finger_pos prevA, finger_pos A, finger_pos prevB, finger_pos B)
+{
+  int dist_prev_x = abs(prevA.x - prevB.x);
+  int dist_prev_y = abs(prevA.y - prevB.y);
+  int dist_now_x = abs(A.x - B.x);
+  int dist_now_y = abs(A.y - B.y);
+  unsigned long dist_prev = dist_prev_x * dist_prev_x + dist_prev_y * dist_prev_y;
+  unsigned long dist = dist_now_x * dist_now_x + dist_now_y * dist_now_y;
+  if (dist_prev < dist)
+    return ZOOM_IN;
+  else if (dist_prev > dist)
+    return ZOOM_OUT;
+  else
+    return INVALID;
+}

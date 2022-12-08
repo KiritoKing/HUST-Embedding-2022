@@ -87,7 +87,7 @@ void display_image(pos_image *img)
 
 void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
 {
-  if (scale <= 0 || scale == img->scale)
+  if (scale < 1 || scale == img->scale || scale > 200)
     return;
   float ratio = (float)scale / (float)100;
 
@@ -142,7 +142,7 @@ void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
 
 void fit_screen(pos_image *img)
 {
-  float ratio;
+  float ratio = 0;
   // 只考虑原数据
   int w = img->data->pixel_w;
   int h = img->data->pixel_h;
@@ -150,15 +150,19 @@ void fit_screen(pos_image *img)
   {
     if (w < SCREEN_WIDTH)
       return;
-    ratio = SCREEN_WIDTH / w;
+    ratio = (float)SCREEN_WIDTH / (float)w;
   }
   else
   {
     if (h < SCREEN_HEIGHT)
       return;
-    ratio = SCREEN_HEIGHT / h;
+    ratio = (float)SCREEN_HEIGHT / (float)h;
   }
+  if (ratio == 0)
+    return;
   int scale = (int)(ratio * (float)100);
+  scale = scale / 10 * 10;
+  printf("fit ratio: %f, scale: %d\n", ratio, scale);
   zoom_image(scale, img);
 }
 
