@@ -1,5 +1,8 @@
 #include "lab.h"
 
+extern int total;
+extern int now;
+
 pos_image *init_image(fb_image *data)
 {
   pos_image *img = (pos_image *)malloc(sizeof(pos_image));
@@ -23,14 +26,16 @@ void move_image(int x, int y, pos_image *img)
 {
   int w = img->data->pixel_w; // img width - overscroll alias
   int h = img->data->pixel_h; // img height
-  if (img->scale != 100 && img->tmp != NULL)
+
+  if (img->scale != 100 && img->tmp != NULL) // choose zoomed img
   {
     printf("move zoomed image\n");
     w = img->tmp->pixel_w;
     h = img->tmp->pixel_h;
   }
+
   if (x + SCREEN_WIDTH < w)
-    img->x = x;
+    img->x = x > 0 ? x : 0;
   else
   {
     printf("over scrolled x\n");
@@ -39,8 +44,9 @@ void move_image(int x, int y, pos_image *img)
     else
       img->x = 0;
   }
+
   if (y + SCREEN_HEIGHT < h)
-    img->y = y;
+    img->y = y > 0 ? y : 0;
   else
   {
     printf("over scrolled y\n");
@@ -81,7 +87,7 @@ void display_image(pos_image *img)
 
 void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
 {
-  if (scale < 0 || scale == img->scale)
+  if (scale <= 0 || scale == img->scale)
     return;
   float ratio = (float)scale / (float)100;
 
@@ -132,4 +138,76 @@ void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
   img->tmp = zoom_img;
 
   move_image(img->x * ratio, img->y * ratio, img); // move anchor
+}
+
+void fit_screen(pos_image *img)
+{
+  float ratio;
+  // 只考虑原数据
+  int w = img->data->pixel_w;
+  int h = img->data->pixel_h;
+  if (w > h)
+  {
+    if (w < SCREEN_WIDTH)
+      return;
+    ratio = SCREEN_WIDTH / w;
+  }
+  else
+  {
+    if (h < SCREEN_HEIGHT)
+      return;
+    ratio = SCREEN_HEIGHT / h;
+  }
+  int scale = (int)(ratio * (float)100);
+  zoom_image(scale, img);
+}
+
+char *get_ext(const char *fname)
+{
+  int len = strlen(fname);
+  for (int i = len - 1; i >= 0; i--)
+  {
+    if (fname[i] == '.')
+    {
+      int ext_len = len - i - 1;
+      char *ext = (char *)malloc(ext_len + 1);
+      memset(ext, '\0', ext_len + 1);
+      memcpy(ext, fname + i + 1, ext_len);
+      printf("type: %s file\n", ext);
+      return ext;
+    }
+  }
+  return NULL;
+}
+
+int str_cmp_head(const char *dst, const char *src)
+{
+  int flag = 1;
+  for (int i = 0; dst[i] != '\0'; i++)
+  {
+    if (src[i] == '\0')
+      break;
+    if (dst[i] != src[i])
+    {
+      flag = 0;
+      break;
+    }
+  }
+  return flag;
+}
+
+int next_pic(int now)
+{
+  if (now + 1 < total)
+    return now + 1;
+  else
+    return 0;
+}
+
+int prev_pic(int now)
+{
+  if (now > 0)
+    return now - 1;
+  else
+    return total - 1;
 }
