@@ -21,8 +21,14 @@ void free_image(pos_image *img)
 
 void move_image(int x, int y, pos_image *img)
 {
-  int w = img->data->pixel_w; // img width
+  int w = img->data->pixel_w; // img width - overscroll alias
   int h = img->data->pixel_h; // img height
+  if (img->scale != 100 && img->tmp != NULL)
+  {
+    printf("move zoomed image\n");
+    w = img->tmp->pixel_w;
+    h = img->tmp->pixel_h;
+  }
   if (x + SCREEN_WIDTH < w)
     img->x = x;
   else
@@ -48,10 +54,11 @@ void move_image(int x, int y, pos_image *img)
 
 void display_image(pos_image *img)
 {
+  // refresh screen
   fb_draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
   fb_update();
 
-  fb_image *data = img->tmp == NULL ? img->data : img->tmp;
+  fb_image *data = img->tmp == NULL ? img->data : img->tmp;                        // choose zoomed img if exist
   int w = data->pixel_w > SCREEN_WIDTH ? SCREEN_WIDTH : data->pixel_w;             // sub-img width
   int h = data->pixel_h > SCREEN_HEIGHT ? SCREEN_HEIGHT : data->pixel_h;           // sub-img height
   int x = data->pixel_w > SCREEN_WIDTH ? 0 : (SCREEN_WIDTH - data->pixel_w) / 2;   // screen x
@@ -76,9 +83,12 @@ void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
 {
   if (scale < 0 || scale == img->scale)
     return;
+  float ratio = (float)scale / (float)100;
+
   if (scale == 100)
   {
-    printf("reset and clear zoom temp");
+    printf("reset and clear zoom temp\n");
+    move_image(img->x * ratio, img->y * ratio, img); // move anchor
     img->scale = scale;
     if (img->tmp != NULL)
     {
@@ -88,7 +98,6 @@ void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
     return;
   }
 
-  float ratio = (float)scale / (float)100;
   img->scale = scale;
 
   int iw = img->data->pixel_w * ratio;
@@ -117,9 +126,10 @@ void zoom_image(int scale, pos_image *img) // 采用临近插值法计算
       memcpy(dst, src, 4);
     }
   }
-
   if (img->tmp != NULL)
     fb_free_image(img->tmp);
   zoom_img->content = buf;
   img->tmp = zoom_img;
+
+  move_image(img->x * ratio, img->y * ratio, img); // move anchor
 }

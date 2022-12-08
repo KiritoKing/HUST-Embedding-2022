@@ -10,21 +10,21 @@ int main()
 	fb_draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
 	fb_update();
 
-	printf("Name Of JPG: ");
-	char file[10] = "";
-	scanf("%s", file);
+	// printf("Name Of JPG: ");
+	// char file[10] = "";
+	// scanf("%s", file);
 	char getBuf;
-	while ((getBuf = getchar()) != '\n' && getBuf != EOF)
-		continue;
+	// while ((getBuf = getchar()) != '\n' && getBuf != EOF)
+	// 	continue;
 
-	fb_image *data = fb_read_jpeg_image(file);
+	fb_image *data = fb_read_jpeg_image("big.jpg");
+	printf("image size: (%d*%d)\n", data->pixel_w, data->pixel_h);
 	pos_image *img = init_image(data);
+	move_image(1500, 1500, img);
 	display_image(img);
 	int scale;
 	while (scanf("%d", &scale))
 	{
-		while ((getBuf = getchar()) != '\n' && getBuf != EOF)
-			continue;
 		zoom_image(scale, img);
 		display_image(img);
 	}
