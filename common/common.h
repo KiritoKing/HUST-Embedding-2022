@@ -56,13 +56,14 @@ typedef struct
 } fb_image;
 
 fb_image *fb_new_image(int color_type, int w, int h, int line_byte);
+fb_image *fb_get_sub_image(fb_image *data, int x, int y, int w, int h);
 void fb_free_image(fb_image *image);
 
 fb_image *fb_read_jpeg_image(char *file);
 fb_image *fb_read_png_image(char *file);
 
 /*得到一个图片的子图片,子图片和原图片共享颜色内存*/
-fb_image *fb_get_sub_image(fb_image *img, int x, int y, int w, int h);
+fb_image *fb_get_sub_image(fb_image *data, int x, int y, int w, int h);
 
 typedef struct
 {

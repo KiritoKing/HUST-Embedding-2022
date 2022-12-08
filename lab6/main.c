@@ -1,5 +1,3 @@
-#include <stdio.h>
-#include "../common/common.h"
 #include "lab.h"
 
 int main()
@@ -12,16 +10,24 @@ int main()
 	fb_draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
 	fb_update();
 
-	printf("file dir:");
+	printf("Name Of JPG: ");
 	char file[10] = "";
 	scanf("%s", file);
+	char getBuf;
+	while ((getBuf = getchar()) != '\n' && getBuf != EOF)
+		continue;
 
-	fb_image *img;
-	img = fb_read_jpeg_image(file);
-	printf("line_byte: %d\n", img->line_byte);
-	fb_draw_image(0, 0, img, 0);
-	fb_update();
-	fb_free_image(img);
+	fb_image *data = fb_read_jpeg_image(file);
+	pos_image *img = init_image(data);
+	display_image(img);
 
+	int offset_x, offset_y;
+	while (scanf("%d%d", &offset_x, &offset_y) == 2)
+	{
+		move_image(offset_x, offset_y, img);
+		display_image(img);
+	}
+
+	free_image(img);
 	return 0;
 }

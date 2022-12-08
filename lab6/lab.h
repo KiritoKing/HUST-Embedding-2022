@@ -1,3 +1,7 @@
+#pragma once
+#include "../common/common.h"
+#include <stdio.h>
+
 #define RED FB_COLOR(255, 0, 0)
 #define ORANGE FB_COLOR(255, 165, 0)
 #define YELLOW FB_COLOR(255, 255, 0)
@@ -10,6 +14,13 @@
 
 typedef struct
 {
-	int x;
-	int y;
-} img_pos;
+  int x;     // x in img
+  int y;     // y in img
+  int scale; // percentage
+  fb_image *data;
+} pos_image;
+
+pos_image *init_image(fb_image *data);
+void free_image(pos_image *img);
+void move_image(int x, int y, pos_image *img);
+void display_image(pos_image *img_ptr);

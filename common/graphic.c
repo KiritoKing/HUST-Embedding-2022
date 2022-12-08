@@ -377,17 +377,17 @@ void fb_draw_border(int x, int y, int w, int h, int color)
 /** draw a text string **/
 void fb_draw_text(int x, int y, char *text, int font_size, int color)
 {
-	fb_image *img;
+	fb_image *data;
 	fb_font_info info;
 	int i = 0;
 	int len = strlen(text);
 	while (i < len)
 	{
-		img = fb_read_font_image(text + i, font_size, &info);
-		if (img == NULL)
+		data = fb_read_font_image(text + i, font_size, &info);
+		if (data == NULL)
 			break;
-		fb_draw_image(x + info.left, y - info.top, img, color);
-		fb_free_image(img);
+		fb_draw_image(x + info.left, y - info.top, data, color);
+		fb_free_image(data);
 
 		x += info.advance_x;
 		i += info.bytes;
