@@ -226,20 +226,66 @@ void fb_draw_image(int x, int y, fb_image *image, int color)
 
 	if(image->color_type == FB_COLOR_RGB_8880) /*lab3: jpg*/
 	{
-		printf("you need implement fb_draw_image() FB_COLOR_RGB_8880\n"); exit(0);
-
+		int y0, y3;
+		char* dst = (char*)(buf+y*SCREEN_WIDTH+x);
+		char *src = image->content;
+		for(y0=y, y3=iy; y0<y+h; y0++, y3++){
+			memcpy(dst, src, w*4);
+			dst += SCREEN_WIDTH*4;
+			src += w*4;
+		}
 		return;
 	}
 	else if(image->color_type == FB_COLOR_RGBA_8888) /*lab3: png*/
 	{
-		printf("you need implement fb_draw_image() FB_COLOR_RGBA_8888\n"); exit(0);
-
+		int x0, y0, x3, y3;
+		unsigned char alpha;
+		char* colord, *temp;
+		for(y0=y, y3=iy;y0<y+h;y0++,y3++){
+			for(x0=x, x3=ix; x0<x+w; x0++,x3++){
+				colord = (char*)(buf+y0*SCREEN_WIDTH+x0);
+				temp = image->content+y3*image->pixel_w*4+x3*4;
+				alpha = (unsigned char)(temp[3]);
+				switch (alpha){
+					case 0: break;
+					case 255:
+					    colord[0] = temp[0];
+						colord[1] = temp[1];
+						colord[2] = temp[2];
+						break;
+					default:
+						colord[0] += (((temp[0] - colord[0]) * alpha) >> 8);
+						colord[1] += (((temp[1] - colord[1]) * alpha) >> 8);
+						colord[2] += (((temp[2] - colord[2]) * alpha) >> 8);
+				}
+			}
+		}
 		return;
 	}
 	else if(image->color_type == FB_COLOR_ALPHA_8) /*lab3: font*/
 	{
-		printf("you need implement fb_draw_image() FB_COLOR_ALPHA_8\n"); exit(0);
-
+		int x0, y0, x3, y3;
+		unsigned char alpha;
+		char* colord, *temp;
+		for(y0=y, y3=iy; y0<y+h; y0++,y3++){
+			for(x0=x, x3=ix; x0<x+w; x0++,x3++){
+				colord = (char*)(buf+y0*SCREEN_WIDTH+x0);
+				temp = image->content+y3*image->pixel_w+x3;
+				alpha = *temp;
+				switch (alpha){
+					case 0: break;
+					case 255:
+					    colord[0] = (color & 0xff);
+						colord[1] = (color & 0xff00)>>8;
+						colord[2] = (color & 0xff0000)>>16;
+						break;
+					default:
+						colord[0] += ((((color & 0xff) - colord[0]) * alpha) >> 8);
+						colord[1] += (((((color & 0xff00)>>8)- colord[1]) * alpha) >> 8);
+						colord[2] += (((((color & 0xff0000)>>16) - colord[2]) * alpha) >> 8);
+				}
+			}
+		}
 		return;
 	}
 /*---------------------------------------------------------------*/
@@ -277,3 +323,27 @@ void fb_draw_text(int x, int y, char *text, int font_size, int color)
 	return;
 }
 
+/** draw a circle for multiple-touch*/
+void fb_draw_circle(int x, int y, int r, int color)
+{
+	int w, h, x0, y0, left, right, top, bottom;
+	if(x-r < 0) left = 0; else left = x-r;
+	if(x+r > SCREEN_WIDTH) right = SCREEN_WIDTH; else right = x+r;
+	if(y-r < 0) top = 0; else top = y-r;
+	if(y+r >SCREEN_HEIGHT) bottom = SCREEN_HEIGHT; else bottom = y+r;
+	w = right-left;
+	h = bottom-top;
+	x0 = left;
+	y0 = top;
+
+	int *buf = _begin_draw(x0,y0,w,h);
+	for(y0=top;y0<=bottom;y0++){
+		for(x0=left;x0<=right;x0++){
+			double distance = sqrt((x0-x)*(x0-x)+(y0-y)*(y0-y));
+			if(distance <= r){
+				*(buf+y0*SCREEN_WIDTH+x0) = color;
+			}
+		}
+	}
+	return;
+}

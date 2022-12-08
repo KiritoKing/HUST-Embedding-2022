@@ -75,7 +75,7 @@ fb_image * fb_read_font_image(const char *text, int pixel_size, fb_font_info *fo
 
 /*=========================== graphic.c ===============================*/
 #define SCREEN_WIDTH	1024
-#define SCREEN_HEIGHT	600
+#define SCREEN_HEIGHT	768
 
 void fb_init(char *dev);
 void fb_update(void);
@@ -85,6 +85,7 @@ void fb_draw_pixel(int x, int y, int color);
 void fb_draw_rect(int x, int y, int w, int h, int color);
 void fb_draw_border(int x, int y, int w, int h, int color);
 void fb_draw_line(int sx, int sy, int dx, int dy, int color);
+void fb_draw_circle(int x, int y, int r, int color);
 
 /*lab3*/
 void fb_draw_image(int x, int y, fb_image *image, int color);

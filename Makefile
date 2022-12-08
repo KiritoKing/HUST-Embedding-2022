@@ -1,4 +1,4 @@
-DIRS := lab1 lab2 lab3 test lab4 lab5 lab6
+DIRS := lab1 lab2 lab3 test lab4 lab5 lab6 clear
 
 all:
 	@for dir in $(DIRS); do make -C $$dir; done
