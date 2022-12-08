@@ -18,9 +18,11 @@ typedef struct
   int y;     // y in img
   int scale; // percentage
   fb_image *data;
+  fb_image *tmp; // temp for zoom
 } pos_image;
 
 pos_image *init_image(fb_image *data);
 void free_image(pos_image *img);
 void move_image(int x, int y, pos_image *img);
 void display_image(pos_image *img_ptr);
+void zoom_image(int scale, pos_image *img);

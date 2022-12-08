@@ -19,14 +19,20 @@ int main()
 
 	fb_image *data = fb_read_jpeg_image(file);
 	pos_image *img = init_image(data);
-	display_image(img);
-
-	int offset_x, offset_y;
-	while (scanf("%d%d", &offset_x, &offset_y) == 2)
+	zoom_image(50, img);
+	if (img->tmp != NULL)
 	{
-		move_image(offset_x, offset_y, img);
-		display_image(img);
+		printf("draw");
+		fb_draw_image(0, 0, img->tmp, 0);
 	}
+	// display_image(img);
+	// zoom_image(108, img);
+	// int offset_x, offset_y;
+	// while (scanf("%d%d", &offset_x, &offset_y) == 2)
+	// {
+	// 	move_image(offset_x, offset_y, img);
+	// 	display_image(img);
+	// }
 
 	free_image(img);
 	return 0;

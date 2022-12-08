@@ -7,12 +7,15 @@ pos_image *init_image(fb_image *data)
   img->scale = 100;
   img->x = 0;
   img->y = 0;
+  img->tmp = NULL;
   return img;
 }
 
 void free_image(pos_image *img)
 {
   fb_free_image(img->data);
+  if (img->tmp != NULL)
+    fb_free_image(img->tmp);
   free(img);
 }
 
@@ -48,7 +51,9 @@ void display_image(pos_image *img_ptr)
   pos_image img = *img_ptr;
   int w = img.data->pixel_w > SCREEN_WIDTH ? SCREEN_WIDTH : img.data->pixel_w;   // sub-img width
   int h = img.data->pixel_h > SCREEN_HEIGHT ? SCREEN_HEIGHT : img.data->pixel_h; // sub-img height
-  fb_image *part = fb_new_image(FB_COLOR_RGB_8880, w, h, w * 4);
+  int x = img.data->pixel_w > SCREEN_WIDTH ? 0 : (SCREEN_WIDTH - img.data->pixel_w) / 2;
+  int y = img.data->pixel_h > SCREEN_HEIGHT ? 0 : (SCREEN_HEIGHT - img.data->pixel_h) / 2;
+  fb_image *part = fb_new_image(img.data->color_type, w, h, w * 4);
   char *buf = (char *)malloc(w * h * 4);
   int row, written;
   for (row = img.y, written = 0; row < img.y + h; row++, written++)
@@ -58,7 +63,51 @@ void display_image(pos_image *img_ptr)
     memcpy(dst, src, w * 4);
   }
   part->content = buf;
-  fb_draw_image(0, 0, part, 0);
+  fb_draw_image(x, y, part, 0);
   fb_update();
   fb_free_image(part);
+}
+
+void zoom_image(int scale, pos_image *img)
+{
+  if (scale == 100)
+  {
+    img->scale = scale;
+    if (img->tmp != NULL)
+    {
+      fb_free_image(img->tmp);
+      img->tmp = NULL;
+    }
+    return;
+  }
+
+  float ratio = (float)scale / (float)100;
+  printf("zoom: %d%%\n", scale);
+  img->scale = scale;
+
+  int iw = img->data->pixel_w * ratio;
+  int ih = img->data->pixel_h * ratio;
+  fb_image *zoom_img = fb_new_image(img->data->color_type, iw, ih, iw * 4);
+  char *buf = (char *)malloc(iw * ih * 4);
+
+  if (ratio < 1) // 缩小：临近插值
+  {
+    int i, j, written_byte;
+    for (i = 0, written_byte = 0; i < ih; i++) // traverse lines: y_dst
+    {
+      for (j = 0; j < iw; j++, written_byte++) // traverse items: x_dst
+      {
+        char *dst = buf + written_byte * 4;
+        int ox = ((float)j / ratio) + 0.5; // origin x 四舍五入
+        int oy = ((float)i / ratio) + 0.5; // origin y 四舍五入
+        printf("(%d, %d) <=> (%d, %d)\n", j, i, ox, oy);
+        char *src = img->data->content + (oy * img->data->pixel_w + ox) * 4;
+        memcpy(dst, src, 4);
+      }
+    }
+    if (img->tmp != NULL)
+      fb_free_image(img->tmp);
+    zoom_img->content = buf;
+    img->tmp = zoom_img;
+  }
 }
