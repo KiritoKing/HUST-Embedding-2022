@@ -18,8 +18,7 @@ static void touch_event_cb(int fd)
 {
 	if (img == NULL)
 		return;
-	static int touched = 0; // num of finger touched
-	static int lock = -1;		// occupied finger
+	static int lock = -1; // multi-touch lock, start from -1
 
 	fb_image *data = img->tmp == NULL ? img->data : img->tmp;
 	int iw = data->pixel_w;
@@ -28,9 +27,9 @@ static void touch_event_cb(int fd)
 	switch (type)
 	{
 	case TOUCH_PRESS:
-		if (touched > 0)
+		if (lock > -1)
 			return;
-		printf("t_b: %d\n", touched++);
+		printf("lock: %d\n", ++lock);
 		printf("TOUCH_PRESS:x=%d,y=%d,finger=%d\n", x, y, finger);
 		lock = finger;
 		fin_pos[finger].x = x;
@@ -42,9 +41,9 @@ static void touch_event_cb(int fd)
 		// fin_pos[finger].y = y;
 		break;
 	case TOUCH_RELEASE:
-		if (finger != lock)
+		if (finger > lock)
 			return;
-		printf("t_b: %d\n", touched--);
+		printf("lock: %d\n", --lock);
 		printf("TOUCH_RELEASE:x=%d,y=%d,finger=%d\n", x, y, finger);
 		int event = get_single_event(fin_pos[finger].x, fin_pos[finger].y, x, y);
 		switch (event)
@@ -92,7 +91,6 @@ static void touch_event_cb(int fd)
 		default:
 			break;
 		}
-		lock = -1; // unlock
 		break;
 	case TOUCH_ERROR:
 		printf("close touch fd\n");
