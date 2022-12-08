@@ -75,7 +75,7 @@ fb_image * fb_read_font_image(const char *text, int pixel_size, fb_font_info *fo
 
 /*=========================== graphic.c ===============================*/
 #define SCREEN_WIDTH	1024
-#define SCREEN_HEIGHT	768
+#define SCREEN_HEIGHT	600
 
 void fb_init(char *dev);
 void fb_update(void);

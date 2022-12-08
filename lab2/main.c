@@ -53,7 +53,7 @@ int main(int argc, char* argv[])
 	printf("draw rect: %d ms\n",end - start);
 
 	sleep(1);
-	fb_draw_rect(300, 200, 400, 200, BLACK); // 这里修改了坐标以适配buffer
+	fb_draw_rect(300, 200, 400, 200, BLACK); 
 	fb_update();
 	start = task_get_time();
 	for(row=0;row<=400;row+=20){
