@@ -19,17 +19,20 @@ static void touch_event_cb(int fd)
 	if (img == NULL)
 		return;
 	static int touched = 0; // num of finger touched
-	
+	static int lock = -1;		// occupied finger
+
 	fb_image *data = img->tmp == NULL ? img->data : img->tmp;
 	int iw = data->pixel_w;
-	if (iw < SCREEN_WIDTH)
-		printf("switch mode\n");
 	int type, x, y, finger;
 	type = touch_read(fd, &x, &y, &finger);
 	switch (type)
 	{
 	case TOUCH_PRESS:
+		if (touched > 0)
+			return;
+		printf("t_b: %d\n", touched++);
 		printf("TOUCH_PRESS:x=%d,y=%d,finger=%d\n", x, y, finger);
+		lock = finger;
 		fin_pos[finger].x = x;
 		fin_pos[finger].y = y;
 		break;
@@ -39,6 +42,9 @@ static void touch_event_cb(int fd)
 		// fin_pos[finger].y = y;
 		break;
 	case TOUCH_RELEASE:
+		if (finger != lock)
+			return;
+		printf("t_b: %d\n", touched--);
 		printf("TOUCH_RELEASE:x=%d,y=%d,finger=%d\n", x, y, finger);
 		int event = get_single_event(fin_pos[finger].x, fin_pos[finger].y, x, y);
 		switch (event)
@@ -61,6 +67,7 @@ static void touch_event_cb(int fd)
 				free_image(img);
 				data = fb_read_jpeg_image(pic_list[now]);
 				img = init_image(data);
+				printf("prev pic\n");
 			}
 			else
 			{
@@ -76,6 +83,7 @@ static void touch_event_cb(int fd)
 				free_image(img);
 				data = fb_read_jpeg_image(pic_list[now]);
 				img = init_image(data);
+				printf("next pic\n");
 			}
 			else
 				move_image(img->x + unit, img->y, img);
@@ -84,6 +92,7 @@ static void touch_event_cb(int fd)
 		default:
 			break;
 		}
+		lock = -1; // unlock
 		break;
 	case TOUCH_ERROR:
 		printf("close touch fd\n");
