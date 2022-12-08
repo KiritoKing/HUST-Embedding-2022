@@ -1,22 +1,27 @@
 #include <stdio.h>
 #include "../common/common.h"
-
-#define RED FB_COLOR(255, 0, 0)
-#define ORANGE FB_COLOR(255, 165, 0)
-#define YELLOW FB_COLOR(255, 255, 0)
-#define GREEN FB_COLOR(0, 255, 0)
-#define CYAN FB_COLOR(0, 127, 255)
-#define BLUE FB_COLOR(0, 0, 255)
-#define PURPLE FB_COLOR(139, 0, 255)
-#define WHITE FB_COLOR(255, 255, 255)
-#define BLACK FB_COLOR(0, 0, 0)
+#include "lab.h"
 
 int main()
 {
-	printf("hello world!\n");
+	printf("\n=============Lab6: Image Display App Running=============\n");
 
 	fb_init("/dev/fb0");
 	font_init("./font.ttc");
+
+	fb_draw_rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
+	fb_update();
+
+	printf("file dir:");
+	char file[10] = "";
+	scanf("%s", file);
+
+	fb_image *img;
+	img = fb_read_jpeg_image(file);
+	printf("line_byte: %d\n", img->line_byte);
+	fb_draw_image(0, 0, img, 0);
+	fb_update();
+	fb_free_image(img);
 
 	return 0;
 }
