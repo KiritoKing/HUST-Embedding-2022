@@ -19,11 +19,14 @@ int main()
 
 	fb_image *data = fb_read_jpeg_image(file);
 	pos_image *img = init_image(data);
-	zoom_image(50, img);
-	if (img->tmp != NULL)
+	display_image(img);
+	int scale;
+	while (scanf("%d", &scale))
 	{
-		printf("draw");
-		fb_draw_image(0, 0, img->tmp, 0);
+		while ((getBuf = getchar()) != '\n' && getBuf != EOF)
+			continue;
+		zoom_image(scale, img);
+		display_image(img);
 	}
 	// display_image(img);
 	// zoom_image(108, img);
