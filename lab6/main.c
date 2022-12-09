@@ -163,7 +163,7 @@ int main()
 	display_image(img);
 
 	// touch utils
-	touch_fd = touch_init("/dev/input/event1");
+	touch_fd = touch_init("/dev/input/event2");
 	task_add_file(touch_fd, touch_event_cb);
 
 	task_loop(); // 进入任务循环
